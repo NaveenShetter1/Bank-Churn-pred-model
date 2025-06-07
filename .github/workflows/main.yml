@@ -21,7 +21,7 @@ jobs:
       - name: Transfer Folder to EC2
         run: |
           ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-          cd /home/ubuntu/Diabites_Test_ML_Project || git clone https://github.com/NaveenShetter1/Bank-Churn-pred-model.git
+          cd /home/ubuntu/Bank-Churn-pred-model || git clone https://github.com/NaveenShetter1/Bank-Churn-pred-model.git
           cd /home/ubuntu/Bank-Churn-pred-model
           git pull origin main
           EOF
