@@ -1,0 +1,41 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main  # Runs when code is pushed to 'main' branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH
+        run: |
+          echo "${{ secrets.SSH_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+
+      - name: Transfer Folder to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          cd /home/ubuntu/Diabites_Test_ML_Project || git clone https://github.com/NaveenShetter1/Bank-Churn-pred-model.git
+          cd /home/ubuntu/Bank-Churn-pred-model
+          git pull origin main
+          EOF
+
+      - name: Verify Folder on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          cd /home/ubuntu/Bank-Churn-pred-model
+          ls -l
+          EOF
+
+      - name: Restart Flask App
+        run: |
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          sudo systemctl restart flaskapp
+          sudo systemctl status flaskapp --no-pager
+          EOF
